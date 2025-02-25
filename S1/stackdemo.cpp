@@ -64,21 +64,12 @@ bool stack<T>::empty() const {
 
 template<typename T>
 void stack<T>::push(const T &x) {
-    if (c_index < stack_size) {
         li[c_index++] = x;
-    } else {
-        cout << "Stack overflow!" << endl;
-    }
 }
 
 template<typename T>
 T stack<T>::pop() {
-    if (c_index > 0) {
         return li[--c_index];
-    } else {
-        cout << "Stack underflow!" << endl;
-        return T();
-    }
 }
 
 template<typename T>
@@ -86,7 +77,7 @@ int stack<T>::size() const {
     return c_index;
 }
 
-template<typename T> // Return default value of Ttemp
+template<typename T>
 
 ostream &operator<<(ostream &out, const stack<T> &s) {
     out << "[";
@@ -100,44 +91,3 @@ ostream &operator<<(ostream &out, const stack<T> &s) {
     return out;
 }
 
-#ifndef CONTEST2
-int main() {
-    stack<int> s(10);
-    cout << "s is empty: " << s.empty() << endl;
-
-    s.push(42);
-    cout << "s has one element: " << s << endl;
-
-    s.push(17);
-    s.push(34);
-    cout << "s has more elements: " << s << endl;
-    cout << "How many? " << s.size() << endl;
-
-    stack<int> t(5);
-    t.push(7);
-    cout << "t: " << t << endl;
-
-    t = s;
-    cout << "popping from s: " << s.pop() << endl;
-
-    s.push(8);
-    stack<int> a(s);
-    t.push(99);
-    a.push(77);
-
-    cout << "s: " << s << endl;
-    cout << "t: " << t << endl;
-    cout << "a: " << a << endl;
-
-    stack<double> c(4);
-    c.push(3.14);
-    c.push(1.414);
-    cout << "c contains doubles " << c << endl;
-
-    stack<char> k(4);
-    k.push('$');
-    cout << "k contains a character " << k << endl;
-
-    return 0;
-}
-#endif

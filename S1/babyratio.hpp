@@ -1,4 +1,3 @@
-#pragma once
 class rational {
 public:
     rational(int n, int d);
