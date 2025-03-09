@@ -1,4 +1,8 @@
-.idea
-.clang-format
-!*.cpp
-!*.hpp
+*
+!S1/
+!S2/
+S1/**/*.cpp
+S1/**/*.hpp
+S2/**/*.cpp
+S2/**/*.hpp
+
