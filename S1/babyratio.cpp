@@ -1,45 +1,62 @@
-#ifndef CONTEST
-#include "babyratio.hpp"
-#endif
-#include <iostream>
-
-using namespace std;
-
-rational::rational(const int n, const int d) : nom(n), den(d) {}
-
-rational rational::add(const rational r) const {
-    int n_nom = nom * r.den + den * r.nom;
-    int n_den = den * r.den;
-    int x = gcd(n_den, n_nom);
-    n_nom = n_nom / x;
-    n_den = n_den / x;
-    return rational(n_nom, n_den);
-}
-rational rational::sub(const rational r) {
-    int n_nom = nom * r.den - den * r.nom;
-    int n_den = den * r.den;
-    int x = gcd(n_den, n_nom);
-    n_nom = n_nom / x;
-    n_den = n_den / x;
-    return {n_nom, n_den};
-}
-rational rational::mul(const rational r) {
-    int x = gcd(nom * r.nom, den * r.den);
-    return {nom * r.nom / x, den * r.den / x};
-}
-rational rational::div(const rational r) {
-    int x = gcd(nom * r.den, den * r.nom);
-    return {nom * r.den / x, den * r.nom / x};
-}
-
-void rational::print() { cout << nom << "/" << den; }
-int rational::gcd(int a, int b) {
-    a = abs(a), b = abs(b);
-    while (a != 0 && b != 0) {
-        if (a > b)
-            a %= b;
-        else
-            b %= a;
-    }
-    return a + b;
+#include <iostream>  
+#ifndef CONTEST  
+#include "babyratio.hpp"  
+#endif  
+  
+using namespace std;  
+  
+rational::rational (int n, int d) {  
+  int g = gcd(n, d);  
+  nom = n / g;  
+  den = d / g;  
+}  
+  
+rational rational::add (rational r) {  
+  int a = den * r.nom + nom * r.den;  
+  int b = r.den * den;  
+  int g = gcd(nom, den);  
+  a /= g, b /= g;  
+  rational s(a, b);  
+  return s;  
+}  
+  
+rational rational::sub (rational r) {  
+  int a = nom * r.den - den * r.nom;  
+  int b = r.den * den;  
+  int g = gcd(nom, den);  
+  a /= g, b /= g;  
+  rational s(a, b);  
+  return s;  
+}  
+  
+rational rational::mul (rational r) {  
+  int a = nom * r.nom;  
+  int b = r.den * den;  
+  int g = gcd(nom, den);  
+  a /= g, b /= g;  
+  rational s(a, b);  
+  return s;  
+}  
+  
+rational rational::div (rational r) {  
+  int a = nom * r.den;  
+  int b = r.nom * den;  
+  int g = gcd(nom, den);  
+  a /= g, b /= g;  
+  rational s(a, b);  
+  return s;  
+}  
+  
+void rational::print () {  
+  if (den < 0) nom = (-1) * nom, den = abs(den);  
+  std::cout << nom << "/" << den;   
+}  
+  
+int rational::gcd (int a, int b) {  
+  a = abs(a), b = abs(b);  
+  while (a != 0 && b != 0) {  
+    if (a > b) a %= b;  
+    else b %= a;  
+  }  
+  return a+b;  
 }
