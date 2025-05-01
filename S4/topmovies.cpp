@@ -49,5 +49,6 @@ int main() {
     if (vote >= 0 && vote <= 100)
       list.insert(title, vote);
   }
+  cout << 1 << endl;
   list.print(n);
 }

@@ -1,16 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-struct Node
-{
-  string data;
-  int times;
-  Node *left, *right;
-  Node(string s, Node *l = nullptr, Node *r = nullptr) : data(s), left(l), right(r), times(1) {}
-};
-
-class lexicon
-{
+class lexicon {
 public:
   lexicon();
   ~lexicon();
@@ -23,197 +14,144 @@ public:
   friend ostream &operator<<(ostream &out, const lexicon &l);
 
 private:
-  Node *r;
-  void katastrofeas(Node *p);
-  void afaireths(const string &s);
-  void printer(ostream &out, Node *n) const;
+  struct Node {
+    string word;
+    int times;
+    Node *left;
+    Node *right;
+    Node(string s, Node *l = nullptr, Node *r = nullptr)
+        : word(s), left(l), right(r), times(1) {}
+  };
+  Node *root;
+  static Node *remover(Node *n, const string &word) {
+    if (n == nullptr)
+      return n;
+    if (word < n->word)
+      n->left = remover(n->left, word);
+    else if (word > n->word)
+      n->right = remover(n->right, word);
+    else {
+      if (n->left == nullptr && n->right == nullptr) {
+        delete n;
+        return nullptr;
+      } else if (n->left == nullptr) {
+        Node *temp = n->right;
+        delete n;
+        return temp;
+      } else if (n->right == nullptr) {
+        Node *temp = n->left;
+        delete n;
+        return temp;
+      }
+      Node *temp = maxValueNode(n->left);
+      n->word = temp->word;
+      n->times = temp->times;
+      n->left = remover(n->left, temp->word);
+    }
+    return n;
+  }
+  static Node *maxValueNode(Node *n) {
+    while (n->right != nullptr)
+      n = n->right;
+    return n;
+  }
+  void printer(Node *n) const;
+  void destructor(Node *n);
 };
 
-lexicon::lexicon() : r(nullptr) {}
-lexicon::~lexicon() { katastrofeas(r); }
-void lexicon::insert(const string &s)
-{
-  if (r == nullptr)
-  {
-    r = new Node(s);
+lexicon::lexicon() : root(nullptr) {}
+lexicon::~lexicon() { destructor(root); }
+void lexicon::insert(const string &s) {
+  if (root == nullptr) {
+    root = new Node(s);
     return;
   }
-  Node *temp = r;
-  while (s != temp->data)
-  {
-    if (s > temp->data)
-    {
-      if (temp->right != nullptr)
-        temp = temp->right;
-      else
-      {
-        temp->right = new Node(s);
-        return;
-      }
+  Node *current = root;
+  Node *parent = nullptr;
+  while (current != nullptr) {
+    if (current->word == s) {
+      current->times++;
+      return;
     }
-    else if (s < temp->data)
-    {
-      if (temp->left != nullptr)
-        temp = temp->left;
-      else
-      {
-        temp->left = new Node(s);
-        return;
-      }
+    parent = current;
+    if (s < current->word) {
+      current = current->left;
+    } else {
+      current = current->right;
     }
   }
-  temp->times++;
-  return;
+  if (s < parent->word) {
+    parent->left = new Node(s);
+  } else {
+    parent->right = new Node(s);
+  }
 }
-int lexicon::lookup(const string &s) const
-{
-  Node *temp = r;
-  while (temp != nullptr)
-  {
-    if (s == temp->data)
+int lexicon::lookup(const string &s) const {
+  Node *temp = root;
+  while (temp != nullptr) {
+    if (temp->word == s) {
       return temp->times;
-    else
-    {
-      if (s < temp->data)
-        temp = temp->left;
-      else if (s > temp->data)
-        temp = temp->right;
+    }
+    if (temp->word > s) {
+      temp = temp->left;
+    } else {
+      temp = temp->right;
     }
   }
   return 0;
 }
-int lexicon::depth(const string &s)
-{
-  Node *temp = r;
-  int counter = 0;
-  while (temp != nullptr)
-  {
-    if (s == temp->data)
-      return counter;
-
-    if (s < temp->data)
+int lexicon::depth(const string &s) {
+  int depth = -1;
+  Node *temp = root;
+  while (temp != nullptr) {
+    depth++;
+    if (temp->word > s) {
       temp = temp->left;
-    else if (s > temp->data)
+    } else if (temp->word < s)
       temp = temp->right;
-    counter++;
+
+    else
+      return depth;
   }
   return -1;
 }
-void lexicon::replace(const string &s1, const string &s2)
-{
-  int x = lookup(s1);
-  if (x == 0)
+void lexicon::replace(const string &s1, const string &s2) {
+  if (lookup(s1) == 0)
     return;
-  int res_ties = x + lookup(s2);
-  afaireths(s1);
-  afaireths(s2);
+  int new_times = lookup(s1) + lookup(s2);
+  root = remover(root, s1);
   insert(s2);
-  Node *temp = r;
-  while (s2 != temp->data)
-  {
-    if (s2 > temp->data)
+  Node *temp = root;
+  while (s2 != temp->word) {
+    if (s2 > temp->word)
       temp = temp->right;
-    else if (s2 < temp->data)
+    else if (s2 < temp->word)
       temp = temp->left;
   }
-  temp->times = res_ties;
+  temp->times = new_times;
 }
-ostream &operator<<(ostream &out, const lexicon &l)
-{
-  l.printer(out, l.r);
+void lexicon::destructor(Node *n) {
+  if (n != nullptr) {
+    destructor(n->left);
+    destructor(n->right);
+    delete n;
+  }
+}
+
+void lexicon::printer(Node *n) const {
+  if (n != nullptr) {
+    printer(n->left);
+    cout << n->word << " " << n->times << endl;
+    printer(n->right);
+  }
+}
+ostream &operator<<(ostream &out, const lexicon &l) {
+  l.printer(l.root);
   return out;
-}
-void lexicon::printer(ostream &out, Node *n) const
-{
-  if (n != nullptr)
-  {
-    printer(out, n->left);
-    out << n->data << " " << n->times << "\n";
-    printer(out, n->right);
-  }
-}
-void lexicon::katastrofeas(Node *p)
-{
-  if (p != nullptr)
-  {
-    katastrofeas(p->left);
-    katastrofeas(p->right);
-    delete p;
-  }
-}
-void lexicon::afaireths(const string &s)
-{
-  Node *n = r;
-  Node *parent = nullptr;
-
-  while (n != nullptr && n->data != s)
-  {
-    parent = n;
-    if (s < n->data)
-      n = n->left;
-    else
-      n = n->right;
-  }
-
-  if (n == nullptr) // Node not found
-    return;
-
-  if (n->left == nullptr && n->right == nullptr) // Leaf node
-  {
-    if (n == r)
-      r = nullptr;
-    else if (parent->left == n)
-      parent->left = nullptr;
-    else
-      parent->right = nullptr;
-    delete n;
-  }
-  else if (n->left == nullptr) // Node with only right child
-  {
-    if (n == r)
-      r = n->right;
-    else if (parent->left == n)
-      parent->left = n->right;
-    else
-      parent->right = n->right;
-    delete n;
-  }
-  else if (n->right == nullptr) // Node with only left child
-  {
-    if (n == r)
-      r = n->left;
-    else if (parent->left == n)
-      parent->left = n->left;
-    else
-      parent->right = n->left;
-    delete n;
-  }
-  else // Node with two children
-  {
-    Node *successorParent = n;
-    Node *successor = n->right;
-
-    while (successor->left != nullptr)
-    {
-      successorParent = successor;
-      successor = successor->left;
-    }
-
-    n->data = successor->data;
-    n->times = successor->times;
-
-    if (successorParent->left == successor)
-      successorParent->left = successor->right;
-    else
-      successorParent->right = successor->right;
-
-    delete successor;
-  }
 }
 
 #ifndef CONTEST
-int main()
-{
+int main() {
   lexicon l;
   l.insert("the");
   l.insert("boy");
